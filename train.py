@@ -11,7 +11,7 @@ File description:
 ################################################################################
 # Imports
 from packages import *
-from model import build_model_mobilenet
+from model import build_model_mobilenet, build_cnn_vgg16
 
 
 ################################################################################
@@ -68,6 +68,7 @@ if __name__ == "__main__":
 
     # ----- MODEL ----- #
     model = build_model_mobilenet(num_classes=num_classes)
+    #model = build_cnn_vgg16(num_classes=num_classes)
 
     model.compile(
         loss="categorical_crossentropy",
