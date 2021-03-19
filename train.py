@@ -11,7 +11,7 @@ File description:
 ################################################################################
 # Imports
 from packages import *
-from model import build_model_mobilenet, build_cnn_vgg16
+from model import build_model_mobilenet, build_cnn_vgg16, build_cnn_custom
 
 
 ################################################################################
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         #height_shift_range=0.3,
         #brightness_range=[0.1, 1.3],
         #zoom_range=0.5,
-        validation_split=0.2
+        validation_split=0.1
     )
 
     train_generator = datagen.flow_from_directory(
@@ -67,12 +67,13 @@ if __name__ == "__main__":
     )
 
     # ----- MODEL ----- #
-    model = build_model_mobilenet(num_classes=num_classes)
+    #model = build_model_mobilenet(num_classes=num_classes)
     #model = build_cnn_vgg16(num_classes=num_classes)
+    model = build_cnn_custom(num_classes=num_classes)
 
     model.compile(
         loss="categorical_crossentropy",
-        optimizer=tf.keras.optimizers.Adam(),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
         metrics=["accuracy"]
     )
 
