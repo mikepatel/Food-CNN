@@ -16,6 +16,8 @@ from packages import *
 ################################################################################
 # MobileNetV2
 def build_model_mobilenet(num_classes):
+    # use Functional API of Model()
+
     mobilenet = tf.keras.applications.MobileNetV2(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
         include_top=False,
@@ -91,6 +93,7 @@ def build_model_mobilenet_2(num_classes):
 
 # VGG16
 def build_cnn_vgg16(num_classes):
+    """
     vgg16 = tf.keras.applications.VGG16(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
         include_top=False
@@ -100,26 +103,45 @@ def build_cnn_vgg16(num_classes):
 
     model = tf.keras.Sequential()
     model.add(vgg16)
-    model.add(tf.keras.layers.Flatten())
+    #model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.GlobalAveragePooling2D())
 
-    model.add(tf.keras.layers.Dense(
-        units=512,
-        activation=tf.keras.activations.relu
-    ))
-
-    model.add(tf.keras.layers.BatchNormalization())
-
-    model.add(tf.keras.layers.Dense(
-        units=256,
-        activation=tf.keras.activations.relu
-    ))
-
-    model.add(tf.keras.layers.BatchNormalization())
-
+    # Output
     model.add(tf.keras.layers.Dense(
         units=num_classes,
         activation=tf.keras.activations.softmax
     ))
+
+    return model
+    """
+
+    inputs = tf.keras.layers.Input(
+        shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS)
+    )
+
+    x = inputs
+    x = tf.keras.applications.vgg16.preprocess_input(x)
+    vgg16 = tf.keras.applications.VGG16(
+        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
+        weights="imagenet",
+        include_top=False
+    )
+
+    vgg16.trainable = False
+    x = vgg16(x, training=False)
+
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.Dense(
+        units=num_classes,
+        activation=tf.keras.activations.softmax
+    )(x)
+
+    outputs = x
+
+    model = tf.keras.Model(
+        inputs=inputs,
+        outputs=outputs
+    )
 
     return model
 

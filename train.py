@@ -42,13 +42,13 @@ if __name__ == "__main__":
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
-        rotation_range=90,
-        horizontal_flip=True,
-        vertical_flip=True,
-        width_shift_range=0.3,
-        height_shift_range=0.3,
-        brightness_range=[0.1, 1.3],
-        zoom_range=0.5,
+        #rotation_range=90,
+        #horizontal_flip=True,
+        #vertical_flip=True,
+        #width_shift_range=0.3,
+        #height_shift_range=0.3,
+        #brightness_range=[0.1, 1.3],
+        #zoom_range=0.5,
         validation_split=0.05
     )
 
@@ -67,10 +67,10 @@ if __name__ == "__main__":
     )
 
     # ----- MODEL ----- #
-    #model = build_model_mobilenet(num_classes=num_classes)
+    model = build_model_mobilenet(num_classes=num_classes)
+    #model = build_model_mobilenet_2(num_classes=num_classes)
     #model = build_cnn_vgg16(num_classes=num_classes)
     #model = build_cnn_custom(num_classes=num_classes)
-    model = build_model_mobilenet_2(num_classes=num_classes)
 
     model.compile(
         loss="categorical_crossentropy",
