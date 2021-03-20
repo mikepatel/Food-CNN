@@ -28,10 +28,8 @@ def build_model_mobilenet(num_classes):
     model = tf.keras.Sequential()
     model.add(mobilenet)
     model.add(tf.keras.layers.Conv2D(
-        filters=128,
+        filters=32,
         kernel_size=3,
-        strides=1,
-        padding="same",
         activation="relu"
     ))
 
@@ -44,6 +42,48 @@ def build_model_mobilenet(num_classes):
     model.add(tf.keras.layers.Dense(
         units=num_classes,
         activation="softmax"
+    ))
+
+    return model
+
+
+# MobileNetV2...v2
+def build_model_mobilenet_2(num_classes):
+    mobilenet = tf.keras.applications.MobileNetV2(
+        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
+        include_top=False,
+        weights="imagenet"
+    )
+
+    mobilenet.trainable = False
+
+    # add classification head
+    model = tf.keras.Sequential()
+    model.add(mobilenet)
+
+    model.add(tf.keras.layers.GlobalAveragePooling2D())
+    model.add(tf.keras.layers.Dense(
+        units=1024,
+        activation=tf.keras.activations.relu
+    ))
+    model.add(tf.keras.layers.Dropout(
+        rate=0.4
+    ))
+    model.add(tf.keras.layers.Dense(
+        units=1024,
+        activation=tf.keras.activations.relu
+    ))
+    model.add(tf.keras.layers.Dropout(
+        rate=0.4
+    ))
+    model.add(tf.keras.layers.Dense(
+        units=512,
+        activation=tf.keras.activations.relu
+    ))
+
+    model.add(tf.keras.layers.Dense(
+        units=num_classes,
+        activation=tf.keras.activations.softmax
     ))
 
     return model
@@ -101,6 +141,8 @@ def build_cnn_custom(num_classes):
     model.add(tf.keras.layers.LeakyReLU())
     model.add(tf.keras.layers.BatchNormalization())
 
+    model.add(tf.keras.layers.Dropout(0.2))
+
     model.add(tf.keras.layers.Conv2D(
         filters=64,
         kernel_size=3,
@@ -109,6 +151,8 @@ def build_cnn_custom(num_classes):
     ))
     model.add(tf.keras.layers.LeakyReLU())
     model.add(tf.keras.layers.BatchNormalization())
+
+    model.add(tf.keras.layers.Dropout(0.2))
 
     model.add(tf.keras.layers.Conv2D(
         filters=128,
@@ -119,6 +163,8 @@ def build_cnn_custom(num_classes):
     model.add(tf.keras.layers.LeakyReLU())
     model.add(tf.keras.layers.BatchNormalization())
 
+    model.add(tf.keras.layers.Dropout(0.2))
+
     model.add(tf.keras.layers.Conv2D(
         filters=256,
         kernel_size=3,
@@ -128,8 +174,10 @@ def build_cnn_custom(num_classes):
     model.add(tf.keras.layers.LeakyReLU())
     model.add(tf.keras.layers.BatchNormalization())
 
+    model.add(tf.keras.layers.Dropout(0.2))
+
     model.add(tf.keras.layers.Conv2D(
-        filters=512,
+        filters=512 ,
         kernel_size=3,
         strides=2,
         padding="same"
