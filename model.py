@@ -63,14 +63,14 @@ def build_model_mobilenet_2(num_classes):
 
     model.add(tf.keras.layers.GlobalAveragePooling2D())
     model.add(tf.keras.layers.Dense(
-        units=1024,
+        units=512,
         activation=tf.keras.activations.relu
     ))
     model.add(tf.keras.layers.Dropout(
         rate=0.4
     ))
     model.add(tf.keras.layers.Dense(
-        units=1024,
+        units=512,
         activation=tf.keras.activations.relu
     ))
     model.add(tf.keras.layers.Dropout(

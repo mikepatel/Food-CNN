@@ -42,13 +42,13 @@ if __name__ == "__main__":
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
-        #rotation_range=90,
-        #horizontal_flip=True,
-        #vertical_flip=True,
-        #width_shift_range=0.3,
-        #height_shift_range=0.3,
-        #brightness_range=[0.1, 1.3],
-        #zoom_range=0.5,
+        rotation_range=90,
+        horizontal_flip=True,
+        vertical_flip=True,
+        width_shift_range=0.3,
+        height_shift_range=0.3,
+        brightness_range=[0.1, 1.3],
+        zoom_range=0.5,
         validation_split=0.05
     )
 
