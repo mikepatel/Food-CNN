@@ -6,12 +6,13 @@ Project description:
     Use TensorFlow to create an object detection model that runs on an Android device
 
 File description:
+    For model training
 
 """
 ################################################################################
 # Imports
 from packages import *
-from model import build_model_mobilenet, build_cnn_vgg16, build_cnn_custom, build_model_mobilenet_2
+from model import build_model_mobilenet, build_cnn_vgg16, build_cnn_custom
 
 
 ################################################################################
@@ -21,24 +22,15 @@ if __name__ == "__main__":
     print(f'TensorFlow version: {tf.__version__}')
 
     # ----- ETL ----- #
-    # labels
-    labels = []
-    int2label = {}
-    directories = os.listdir(TRAIN_DIR)
-    for i in range(len(directories)):
-        name = directories[i]
-        labels.append(name)
-        int2label[i] = name
-
-    num_classes = len(labels)
-    #print(labels)
-    #print(num_classes)
-
     # create text file with labels
+    directories = os.listdir(TRAIN_DIR)
     with open("labels.txt", "w") as f:
         for d in directories:
             f.write(d + "\n")
 
+    num_classes = len(directories)
+
+    """
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
@@ -65,6 +57,37 @@ if __name__ == "__main__":
         batch_size=BATCH_SIZE,
         subset="validation"
     )
+    """
+
+    #print(len(list(pathlib.Path(TRAIN_DIR).glob("*/*.jpg"))))
+
+    # create dataset
+    train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+        directory=TRAIN_DIR,
+        validation_split=VALIDATION_SPLIT,
+        subset="training",
+        image_size=(IMAGE_WIDTH, IMAGE_HEIGHT),
+        batch_size=BATCH_SIZE,
+        seed=DATASET_SEED
+    )
+
+    validation_dataset = tf.keras.preprocessing.image_dataset_from_directory(
+        directory=TRAIN_DIR,
+        validation_split=VALIDATION_SPLIT,
+        subset="validation",
+        image_size=(IMAGE_WIDTH, IMAGE_HEIGHT),
+        batch_size=BATCH_SIZE,
+        seed=DATASET_SEED
+    )
+
+    #print(train_dataset.class_names)
+
+    # configure dataset for performance
+    # cache() --> load images into memory
+    # prefetch() --> overlap data preprocessing and model execution while training
+    AUTOTUNE = tf.data.experimental.AUTOTUNE
+    train_dataset = train_dataset.cache().prefetch(buffer_size=AUTOTUNE)
+    validation_dataset = validation_dataset.cache().prefetch(buffer_size=AUTOTUNE)
 
     # ----- MODEL ----- #
     model = build_model_mobilenet(num_classes=num_classes)
@@ -73,7 +96,7 @@ if __name__ == "__main__":
     #model = build_cnn_custom(num_classes=num_classes)
 
     model.compile(
-        loss="categorical_crossentropy",
+        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
         optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
         metrics=["accuracy"]
     )
@@ -81,6 +104,7 @@ if __name__ == "__main__":
     model.summary()
 
     # ----- TRAIN ----- #
+    """
     history = model.fit(
         x=train_generator,
         steps_per_epoch=len(train_generator),
@@ -88,16 +112,34 @@ if __name__ == "__main__":
         validation_data=validation_generator,
         validation_steps=len(validation_generator)
     )
+    """
+
+    history = model.fit(
+        x=train_dataset,
+        epochs=NUM_EPOCHS,
+        validation_data=validation_dataset
+    )
 
     # plot accuracy
-    plt.plot(history.history["accuracy"], label="accuracy")
-    plt.plot(history.history["val_accuracy"], label="val_accuracy")
-    plt.title("Training Accuracy")
+    plt.plot(history.history["accuracy"], label="Training Accuracy")
+    plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
+    plt.title("Accuracy")
     plt.xlabel("Epoch")
     plt.ylabel("Accuracy")
     plt.grid()
     plt.legend(loc="lower right")
-    plt.savefig(os.path.join(os.getcwd(), "training"))
+    plt.savefig(os.path.join(os.getcwd(), "accuracy"))
+
+    # plot loss
+    plt.clf()
+    plt.plot(history.history["loss"], label="Training Loss")
+    plt.plot(history.history["val_loss"], label="Validation Loss")
+    plt.title("Loss")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.grid()
+    plt.legend(loc="lower right")
+    plt.savefig(os.path.join(os.getcwd(), "loss"))
 
     # save model
     model.save(SAVE_DIR)

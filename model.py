@@ -6,6 +6,7 @@ Project description:
     Use TensorFlow to create an object detection model that runs on an Android device
 
 File description:
+    For model definitions
 
 """
 ################################################################################
@@ -18,6 +19,59 @@ from packages import *
 def build_model_mobilenet(num_classes):
     # use Functional API of Model()
 
+    # define model layers
+    data_augment_layers = tf.keras.Sequential([
+        tf.keras.layers.experimental.preprocessing.RandomFlip(),
+        tf.keras.layers.experimental.preprocessing.RandomRotation(
+            factor=0.2
+        )
+        #tf.keras.layers.experimental.preprocessing.RandomTranslation(
+        #    height_factor=0.2,
+        #    width_factor=0.2
+        #)
+    ])
+
+    preprocess_input_layer = tf.keras.applications.mobilenet_v2.preprocess_input
+    mobilenet = tf.keras.applications.MobileNetV2(
+        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
+        weights="imagenet",
+        include_top=False
+    )
+    mobilenet.trainable = False
+
+    # add classification layers
+    global_pool_layer = tf.keras.layers.GlobalAveragePooling2D()
+    dropout_layer = tf.keras.layers.Dropout(rate=0.2)
+    fc_layer = tf.keras.layers.Dense(
+        units=512,
+        activation=tf.keras.activations.relu
+    )
+    output_layer = tf.keras.layers.Dense(
+        units=num_classes,
+        activation=tf.keras.activations.softmax
+    )
+
+    # build model
+    inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
+    x = inputs
+    x = data_augment_layers(x)
+    x = preprocess_input_layer(x)
+    x = mobilenet(x, training=False)
+    x = global_pool_layer(x)
+    x = dropout_layer(x)
+    x = fc_layer(x)
+    x = dropout_layer(x)
+    x = output_layer(x)
+    outputs = x
+
+    model = tf.keras.Model(
+        inputs=inputs,
+        outputs=outputs
+    )
+
+    return model
+
+    """
     mobilenet = tf.keras.applications.MobileNetV2(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
         include_top=False,
@@ -47,48 +101,7 @@ def build_model_mobilenet(num_classes):
     ))
 
     return model
-
-
-# MobileNetV2...v2
-def build_model_mobilenet_2(num_classes):
-    mobilenet = tf.keras.applications.MobileNetV2(
-        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
-        include_top=False,
-        weights="imagenet"
-    )
-
-    mobilenet.trainable = False
-
-    # add classification head
-    model = tf.keras.Sequential()
-    model.add(mobilenet)
-
-    model.add(tf.keras.layers.GlobalAveragePooling2D())
-    model.add(tf.keras.layers.Dense(
-        units=512,
-        activation=tf.keras.activations.relu
-    ))
-    model.add(tf.keras.layers.Dropout(
-        rate=0.4
-    ))
-    model.add(tf.keras.layers.Dense(
-        units=512,
-        activation=tf.keras.activations.relu
-    ))
-    model.add(tf.keras.layers.Dropout(
-        rate=0.4
-    ))
-    model.add(tf.keras.layers.Dense(
-        units=512,
-        activation=tf.keras.activations.relu
-    ))
-
-    model.add(tf.keras.layers.Dense(
-        units=num_classes,
-        activation=tf.keras.activations.softmax
-    ))
-
-    return model
+    """
 
 
 # VGG16
