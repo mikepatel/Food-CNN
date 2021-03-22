@@ -14,7 +14,6 @@ File description:
 import os
 import matplotlib.pyplot as plt
 import tensorflow as tf
-import pathlib
 
 
 ################################################################################
@@ -28,7 +27,7 @@ IMAGE_WIDTH = 224
 IMAGE_HEIGHT = 224
 IMAGE_CHANNELS = 3
 
-NUM_EPOCHS = 10
+NUM_EPOCHS = 30
 BATCH_SIZE = 32
 VALIDATION_SPLIT = 0.1
 DATASET_SEED = 123

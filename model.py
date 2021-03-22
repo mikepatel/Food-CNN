@@ -31,6 +31,8 @@ def build_model_mobilenet(num_classes):
         #)
     ])
 
+    rescale_layer = tf.keras.layers.experimental.preprocessing.Rescaling(scale=1./255.0)
+
     preprocess_input_layer = tf.keras.applications.mobilenet_v2.preprocess_input
     mobilenet = tf.keras.applications.MobileNetV2(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
@@ -41,7 +43,7 @@ def build_model_mobilenet(num_classes):
 
     # add classification layers
     global_pool_layer = tf.keras.layers.GlobalAveragePooling2D()
-    dropout_layer = tf.keras.layers.Dropout(rate=0.2)
+    dropout_layer = tf.keras.layers.Dropout(rate=0.5)
     fc_layer = tf.keras.layers.Dense(
         units=512,
         activation=tf.keras.activations.relu
@@ -54,13 +56,14 @@ def build_model_mobilenet(num_classes):
     # build model
     inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
     x = inputs
-    x = data_augment_layers(x)
+    #x = data_augment_layers(x)
+    #x = rescale_layer(x)
     x = preprocess_input_layer(x)
     x = mobilenet(x, training=False)
     x = global_pool_layer(x)
     x = dropout_layer(x)
     x = fc_layer(x)
-    x = dropout_layer(x)
+    #x = dropout_layer(x)
     x = output_layer(x)
     outputs = x
 
