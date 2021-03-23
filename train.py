@@ -120,6 +120,10 @@ if __name__ == "__main__":
         validation_data=validation_dataset
     )
 
+    # create a save directory
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+
     # plot accuracy
     plt.plot(history.history["accuracy"], label="Training Accuracy")
     plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
@@ -128,7 +132,7 @@ if __name__ == "__main__":
     plt.ylabel("Accuracy")
     plt.grid()
     plt.legend(loc="lower right")
-    plt.savefig(os.path.join(os.getcwd(), "accuracy"))
+    plt.savefig(os.path.join(SAVE_DIR, "accuracy"))
 
     # plot loss
     plt.clf()
@@ -139,7 +143,7 @@ if __name__ == "__main__":
     plt.ylabel("Loss")
     plt.grid()
     plt.legend(loc="lower right")
-    plt.savefig(os.path.join(os.getcwd(), "loss"))
+    plt.savefig(os.path.join(SAVE_DIR, "loss"))
 
     # save model
     model.save(SAVE_DIR)
@@ -148,5 +152,5 @@ if __name__ == "__main__":
     converter = tf.lite.TFLiteConverter.from_saved_model(SAVE_DIR)
     tflite_model = converter.convert()
 
-    with open('model.tflite', 'wb') as f:
+    with open(os.path.join(SAVE_DIR, 'model.tflite'), 'wb') as f:
         f.write(tflite_model)
