@@ -21,6 +21,10 @@ if __name__ == "__main__":
     # TF version
     print(f'TensorFlow version: {tf.__version__}')
 
+    # create a save directory
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+
     # ----- ETL ----- #
     # create text file with labels
     directories = os.listdir(TRAIN_DIR)
@@ -30,7 +34,6 @@ if __name__ == "__main__":
 
     num_classes = len(directories)
 
-    """
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
@@ -41,7 +44,7 @@ if __name__ == "__main__":
         #height_shift_range=0.3,
         #brightness_range=[0.1, 1.3],
         #zoom_range=0.5,
-        validation_split=0.05
+        validation_split=VALIDATION_SPLIT
     )
 
     train_generator = datagen.flow_from_directory(
@@ -57,10 +60,10 @@ if __name__ == "__main__":
         batch_size=BATCH_SIZE,
         subset="validation"
     )
-    """
 
     #print(len(list(pathlib.Path(TRAIN_DIR).glob("*/*.jpg"))))
 
+    """
     # create dataset
     train_dataset = tf.keras.preprocessing.image_dataset_from_directory(
         directory=TRAIN_DIR,
@@ -88,23 +91,49 @@ if __name__ == "__main__":
     AUTOTUNE = tf.data.experimental.AUTOTUNE
     train_dataset = train_dataset.cache().prefetch(buffer_size=AUTOTUNE)
     validation_dataset = validation_dataset.cache().prefetch(buffer_size=AUTOTUNE)
+    """
 
     # ----- MODEL ----- #
-    model = build_model_mobilenet(num_classes=num_classes)
+    #model = build_model_mobilenet(num_classes=num_classes)
     #model = build_model_mobilenet_2(num_classes=num_classes)
     #model = build_cnn_vgg16(num_classes=num_classes)
     #model = build_cnn_custom(num_classes=num_classes)
 
+    # get MobileNetV2 base
+    mobilenet = tf.keras.applications.MobileNetV2(
+        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
+        weights="imagenet",
+        include_top=False
+    )
+
+    mobilenet.trainable = False
+
+    # add classification head
+    model = tf.keras.Sequential([
+        mobilenet,
+        tf.keras.layers.Conv2D(
+            filters=64,
+            kernel_size=3,
+            activation="relu"
+        ),
+        tf.keras.layers.Dropout(rate=0.5),
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.Dense(
+            units=num_classes,
+            activation="softmax"
+        )
+    ])
+
     model.compile(
-        loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
-        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+        #loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
+        loss="categorical_crossentropy",
+        optimizer=tf.keras.optimizers.Adam(),
         metrics=["accuracy"]
     )
 
     model.summary()
 
     # ----- TRAIN ----- #
-    """
     history = model.fit(
         x=train_generator,
         steps_per_epoch=len(train_generator),
@@ -119,10 +148,35 @@ if __name__ == "__main__":
         epochs=NUM_EPOCHS,
         validation_data=validation_dataset
     )
+    """
 
-    # create a save directory
-    if not os.path.exists(SAVE_DIR):
-        os.makedirs(SAVE_DIR)
+    # save model
+    model.save(SAVE_DIR)
+
+    # fine-tune model
+    # unfreeze base
+    mobilenet.trainable = True
+    fine_tune_at = 100
+    for layer in mobilenet.layers[:fine_tune_at]:
+        layer.trainable = False  # freeze early layers
+
+    # re-compile model
+    model.compile(
+        loss="categorical_crossentropy",
+        optimizer=tf.keras.optimizers.Adam(1e-5),
+        metrics=["accuracy"]
+    )
+
+    model.summary()
+
+    # continue training
+    history = model.fit(
+        x=train_generator,
+        steps_per_epoch=len(train_generator),
+        epochs=NUM_EPOCHS,
+        validation_data=validation_generator,
+        validation_steps=len(validation_generator)
+    )
 
     # plot accuracy
     plt.plot(history.history["accuracy"], label="Training Accuracy")
