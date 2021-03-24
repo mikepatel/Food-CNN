@@ -26,13 +26,15 @@ if __name__ == "__main__":
         os.makedirs(SAVE_DIR)
 
     # ----- ETL ----- #
-    # create text file with labels
+    # get labels / class names
     directories = os.listdir(TRAIN_DIR)
-    with open("labels.txt", "w") as f:
-        for d in directories:
-            f.write(d + "\n")
-
     num_classes = len(directories)
+
+    # create text file with labels
+    if not os.path.exists(os.path.join(os.getcwd(), "labels.txt")):
+        with open("labels.txt", "w") as f:
+            for d in directories:
+                f.write(d + "\n")
 
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
