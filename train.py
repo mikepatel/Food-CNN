@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
-        #rotation_range=90,
+        rotation_range=30,
         #horizontal_flip=True,
         #vertical_flip=True,
         #width_shift_range=0.3,
@@ -51,6 +51,7 @@ if __name__ == "__main__":
         directory=TRAIN_DIR,
         target_size=(IMAGE_WIDTH, IMAGE_HEIGHT),
         batch_size=BATCH_SIZE,
+        shuffle=True,
         subset="training"
     )
 
@@ -58,6 +59,7 @@ if __name__ == "__main__":
         directory=TRAIN_DIR,
         target_size=(IMAGE_WIDTH, IMAGE_HEIGHT),
         batch_size=BATCH_SIZE,
+        shuffle=True,
         subset="validation"
     )
 
@@ -112,7 +114,7 @@ if __name__ == "__main__":
     model = tf.keras.Sequential([
         mobilenet,
         tf.keras.layers.Conv2D(
-            filters=64,
+            filters=32,
             kernel_size=3,
             activation="relu"
         ),

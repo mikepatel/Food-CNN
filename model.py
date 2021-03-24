@@ -17,33 +17,6 @@ from packages import *
 ################################################################################
 # MobileNetV2
 def build_model_mobilenet(num_classes):
-    # get MobileNetV2 base
-    mobilenet = tf.keras.applications.MobileNetV2(
-        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
-        weights="imagenet",
-        include_top=False
-    )
-
-    mobilenet.trainable = False
-
-    # add classification head
-    model = tf.keras.Sequential([
-        mobilenet,
-        tf.keras.layers.Conv2D(
-            filters=64,
-            kernel_size=3,
-            activation="relu"
-        ),
-        tf.keras.layers.Dropout(rate=0.5),
-        tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Dense(
-            units=num_classes,
-            activation="softmax"
-        )
-    ])
-
-    return model
-
     """
     # use Functional API of Model()
     # define model layers
