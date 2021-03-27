@@ -195,8 +195,6 @@ if __name__ == "__main__":
     # save model
     #model.save(SAVE_DIR)
 
-    quit()
-
     # ----- FINE TUNE ----- #
     print(f'\n\nFINE TUNE\n\n')
 
