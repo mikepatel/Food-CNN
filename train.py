@@ -12,7 +12,7 @@ File description:
 ################################################################################
 # Imports
 from packages import *
-from model import build_model_mobilenet, build_cnn_vgg16, build_cnn_custom
+from model import build_model_mobilenet
 
 
 ################################################################################
@@ -39,9 +39,9 @@ if __name__ == "__main__":
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
         rescale=1./255,
-        rotation_range=30,
-        #horizontal_flip=True,
-        #vertical_flip=True,
+        #rotation_range=30,
+        horizontal_flip=True,
+        vertical_flip=True,
         #width_shift_range=0.3,
         #height_shift_range=0.3,
         #brightness_range=[0.1, 1.3],
@@ -53,7 +53,6 @@ if __name__ == "__main__":
         directory=TRAIN_DIR,
         target_size=(IMAGE_WIDTH, IMAGE_HEIGHT),
         batch_size=BATCH_SIZE,
-        shuffle=True,
         subset="training"
     )
 
@@ -61,7 +60,6 @@ if __name__ == "__main__":
         directory=TRAIN_DIR,
         target_size=(IMAGE_WIDTH, IMAGE_HEIGHT),
         batch_size=BATCH_SIZE,
-        shuffle=True,
         subset="validation"
     )
 
@@ -115,23 +113,21 @@ if __name__ == "__main__":
     # add classification head
     model = tf.keras.Sequential([
         mobilenet,
-        tf.keras.layers.Conv2D(
-            filters=32,
-            kernel_size=3,
-            activation="relu"
-        ),
-        tf.keras.layers.Dropout(rate=0.5),
+        tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu"),
         tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Dense(
-            units=num_classes,
-            activation="softmax"
-        )
+        tf.keras.layers.Dropout(rate=0.5),
+        tf.keras.layers.Dense(units=num_classes, activation="softmax")
     ])
 
     model.compile(
         #loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
+        #loss="categorical_crossentropy",
         loss="categorical_crossentropy",
-        optimizer=tf.keras.optimizers.Adam(),
+        optimizer=tf.keras.optimizers.Adam(
+            learning_rate=LEARNING_RATE,
+            #beta_1=BETA_1,
+            #epsilon=EPSILON
+        ),
         metrics=["accuracy"]
     )
 
@@ -154,8 +150,37 @@ if __name__ == "__main__":
     )
     """
 
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
+
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    plt.figure(figsize=(8, 8))
+    plt.subplot(2, 1, 1)
+    plt.plot(acc, label='Training Accuracy')
+    plt.plot(val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.ylabel('Accuracy')
+    plt.ylim([min(plt.ylim()), 1])
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(2, 1, 2)
+    plt.plot(loss, label='Training Loss')
+    plt.plot(val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.ylabel('Cross Entropy')
+    plt.ylim([0, 1.0])
+    plt.title('Training and Validation Loss')
+    plt.xlabel('epoch')
+    #plt.show()
+    plt.savefig(os.path.join(os.getcwd(), "plots"))
+
     # save model
-    model.save(SAVE_DIR)
+    #model.save(SAVE_DIR)
+
+    # ----- FINE TUNE ----- #
+    print(f'\n\nFINE TUNE\n\n')
 
     # fine-tune model
     # unfreeze base
@@ -167,7 +192,7 @@ if __name__ == "__main__":
     # re-compile model
     model.compile(
         loss="categorical_crossentropy",
-        optimizer=tf.keras.optimizers.Adam(1e-5),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE_FINE_TUNING),
         metrics=["accuracy"]
     )
 
@@ -177,38 +202,45 @@ if __name__ == "__main__":
     history = model.fit(
         x=train_generator,
         steps_per_epoch=len(train_generator),
-        epochs=NUM_EPOCHS,
+        epochs=NUM_EPOCHS_FINE_TUNING,
         validation_data=validation_generator,
         validation_steps=len(validation_generator)
     )
 
-    # plot accuracy
-    plt.plot(history.history["accuracy"], label="Training Accuracy")
-    plt.plot(history.history["val_accuracy"], label="Validation Accuracy")
-    plt.title("Accuracy")
-    plt.xlabel("Epoch")
-    plt.ylabel("Accuracy")
-    plt.grid()
-    plt.legend(loc="lower right")
-    plt.savefig(os.path.join(SAVE_DIR, "accuracy"))
+    acc = history.history['accuracy']
+    val_acc = history.history['val_accuracy']
 
-    # plot loss
-    plt.clf()
-    plt.plot(history.history["loss"], label="Training Loss")
-    plt.plot(history.history["val_loss"], label="Validation Loss")
-    plt.title("Loss")
-    plt.xlabel("Epoch")
-    plt.ylabel("Loss")
-    plt.grid()
-    plt.legend(loc="lower right")
-    plt.savefig(os.path.join(SAVE_DIR, "loss"))
+    loss = history.history['loss']
+    val_loss = history.history['val_loss']
+
+    plt.figure(figsize=(8, 8))
+    plt.subplot(2, 1, 1)
+    plt.plot(acc, label='Training Accuracy')
+    plt.plot(val_acc, label='Validation Accuracy')
+    plt.legend(loc='lower right')
+    plt.ylabel('Accuracy')
+    plt.ylim([min(plt.ylim()), 1])
+    plt.title('Training and Validation Accuracy')
+
+    plt.subplot(2, 1, 2)
+    plt.plot(loss, label='Training Loss')
+    plt.plot(val_loss, label='Validation Loss')
+    plt.legend(loc='upper right')
+    plt.ylabel('Cross Entropy')
+    plt.ylim([0, 1.0])
+    plt.title('Training and Validation Loss')
+    plt.xlabel('epoch')
+    #plt.show()
+    plt.savefig(os.path.join(os.getcwd(), "fine_tune"))
 
     # save model
-    model.save(SAVE_DIR)
+    #model.save(SAVE_DIR)
 
+    """
     # ----- DEPLOY ----- #
     converter = tf.lite.TFLiteConverter.from_saved_model(SAVE_DIR)
     tflite_model = converter.convert()
 
     with open(os.path.join(SAVE_DIR, 'model.tflite'), 'wb') as f:
         f.write(tflite_model)
+    """
