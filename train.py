@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=1./255,
+        #rescale=1./255,
         #rotation_range=30,
         horizontal_flip=True,
         vertical_flip=True,
@@ -110,6 +110,7 @@ if __name__ == "__main__":
 
     mobilenet.trainable = False
 
+    """
     # add classification head
     model = tf.keras.Sequential([
         mobilenet,
@@ -118,6 +119,21 @@ if __name__ == "__main__":
         tf.keras.layers.Dropout(rate=0.5),
         tf.keras.layers.Dense(units=num_classes, activation="softmax")
     ])
+    """
+    inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
+    x = inputs
+    x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
+    x = mobilenet(x)
+    x = tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    x = tf.keras.layers.Dropout(rate=0.5)(x)
+    x = tf.keras.layers.Dense(units=num_classes, activation="softmax")(x)
+    outputs = x
+
+    model = tf.keras.Model(
+        inputs=inputs,
+        outputs=outputs
+    )
 
     model.compile(
         #loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
@@ -170,7 +186,7 @@ if __name__ == "__main__":
     plt.plot(val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.ylabel('Cross Entropy')
-    plt.ylim([0, 1.0])
+    plt.ylim([0, 3.0])
     plt.title('Training and Validation Loss')
     plt.xlabel('epoch')
     #plt.show()
@@ -178,6 +194,8 @@ if __name__ == "__main__":
 
     # save model
     #model.save(SAVE_DIR)
+
+    quit()
 
     # ----- FINE TUNE ----- #
     print(f'\n\nFINE TUNE\n\n')
@@ -227,11 +245,11 @@ if __name__ == "__main__":
     plt.plot(val_loss, label='Validation Loss')
     plt.legend(loc='upper right')
     plt.ylabel('Cross Entropy')
-    plt.ylim([0, 1.0])
+    plt.ylim([0, 3.0])
     plt.title('Training and Validation Loss')
     plt.xlabel('epoch')
     #plt.show()
-    plt.savefig(os.path.join(os.getcwd(), "fine_tune"))
+    plt.savefig(os.path.join(os.getcwd(), "plots_finetune"))
 
     # save model
     #model.save(SAVE_DIR)
