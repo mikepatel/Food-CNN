@@ -122,7 +122,7 @@ if __name__ == "__main__":
         tf.keras.layers.Dense(units=num_classes, activation="softmax")
     ])
     """
-
+    """
     # Inception-ResNetV2
     inception = tf.keras.applications.InceptionResNetV2(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
@@ -130,13 +130,23 @@ if __name__ == "__main__":
         include_top=False
     )
     inception.trainable = False
+    """
+
+    # ResNet50V2
+    resnet = tf.keras.applications.ResNet50V2(
+        input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
+        weights="imagenet",
+        include_top=False
+    )
+    resnet.trainable = False
 
     inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
     x = inputs
     #x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
     #x = mobilenet(x)
     #x = tf.keras.applications.inception_resnet_v2.preprocess_input(x)
-    x = inception(x)
+    #x = inception(x)
+    x = resnet(x)
     x = tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
     x = tf.keras.layers.Dropout(rate=0.5)(x)
