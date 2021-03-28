@@ -42,8 +42,8 @@ if __name__ == "__main__":
         #rotation_range=30,
         horizontal_flip=True,
         vertical_flip=True,
-        #width_shift_range=0.3,
-        #height_shift_range=0.3,
+        width_shift_range=0.3,
+        height_shift_range=0.3,
         brightness_range=[0.1, 1.3],
         #zoom_range=0.5,
         validation_split=VALIDATION_SPLIT
@@ -195,6 +195,7 @@ if __name__ == "__main__":
     val_loss = history.history['val_loss']
 
     plt.figure(figsize=(8, 8))
+    plt.grid()
     plt.subplot(2, 1, 1)
     plt.plot(acc, label='Training Accuracy')
     plt.plot(val_acc, label='Validation Accuracy')
@@ -258,6 +259,7 @@ if __name__ == "__main__":
     val_loss = history.history['val_loss']
 
     plt.figure(figsize=(8, 8))
+    plt.grid()
     plt.subplot(2, 1, 1)
     plt.plot(acc, label='Training Accuracy')
     plt.plot(val_acc, label='Validation Accuracy')
