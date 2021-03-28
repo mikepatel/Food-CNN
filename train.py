@@ -38,13 +38,13 @@ if __name__ == "__main__":
 
     # image data generator
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=1./255,
+        #rescale=1./255,
         #rotation_range=30,
         horizontal_flip=True,
         vertical_flip=True,
         #width_shift_range=0.3,
         #height_shift_range=0.3,
-        #brightness_range=[0.1, 1.3],
+        brightness_range=[0.1, 1.3],
         #zoom_range=0.5,
         validation_split=VALIDATION_SPLIT
     )
@@ -101,7 +101,6 @@ if __name__ == "__main__":
     #model = build_cnn_vgg16(num_classes=num_classes)
     #model = build_cnn_custom(num_classes=num_classes)
 
-    """
     # get MobileNetV2 base
     mobilenet = tf.keras.applications.MobileNetV2(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
@@ -110,7 +109,6 @@ if __name__ == "__main__":
     )
 
     mobilenet.trainable = False
-    """
 
     """
     # add classification head
@@ -131,7 +129,7 @@ if __name__ == "__main__":
     )
     inception.trainable = False
     """
-
+    """
     # ResNet50V2
     resnet = tf.keras.applications.ResNet50V2(
         input_shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS),
@@ -139,14 +137,15 @@ if __name__ == "__main__":
         include_top=False
     )
     resnet.trainable = False
+    """
 
     inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
     x = inputs
-    #x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
-    #x = mobilenet(x)
+    x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
+    x = mobilenet(x)
     #x = tf.keras.applications.inception_resnet_v2.preprocess_input(x)
     #x = inception(x)
-    x = resnet(x)
+    #x = resnet(x)
     x = tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
     x = tf.keras.layers.Dropout(rate=0.5)(x)
@@ -218,14 +217,11 @@ if __name__ == "__main__":
     # save model
     #model.save(SAVE_DIR)
 
-    quit()
-
     # ----- FINE TUNE ----- #
     print(f'\n\nFINE TUNE\n\n')
 
     # fine-tune model
     # unfreeze base
-    """
     mobilenet.trainable = True
     fine_tune_at = 100
     for layer in mobilenet.layers[:fine_tune_at]:
@@ -235,6 +231,7 @@ if __name__ == "__main__":
     unfreeze_at = 750
     for layer in inception.layers[:unfreeze_at]:
         layer.trainable = False  # freeze early layers
+    """
 
     # re-compile model
     model.compile(
