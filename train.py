@@ -42,9 +42,9 @@ if __name__ == "__main__":
         #rotation_range=30,
         horizontal_flip=True,
         vertical_flip=True,
-        width_shift_range=0.3,
-        height_shift_range=0.3,
-        brightness_range=[0.1, 1.3],
+        #width_shift_range=0.3,
+        #height_shift_range=0.3,
+        #brightness_range=[0.1, 1.3],
         #zoom_range=0.5,
         validation_split=VALIDATION_SPLIT
     )
@@ -161,11 +161,8 @@ if __name__ == "__main__":
         #loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
         #loss="categorical_crossentropy",
         loss="categorical_crossentropy",
-        optimizer=tf.keras.optimizers.Adam(
-            learning_rate=LEARNING_RATE,
-            #beta_1=BETA_1,
-            #epsilon=EPSILON
-        ),
+        #optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+        optimizer=tf.keras.optimizers.SGD(learning_rate=LEARNING_RATE),
         metrics=["accuracy"]
     )
 
@@ -214,6 +211,8 @@ if __name__ == "__main__":
     plt.xlabel('epoch')
     #plt.show()
     plt.savefig(os.path.join(os.getcwd(), "plots"))
+
+    quit()
 
     # save model
     #model.save(SAVE_DIR)
