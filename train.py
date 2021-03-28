@@ -212,8 +212,6 @@ if __name__ == "__main__":
     #plt.show()
     plt.savefig(os.path.join(os.getcwd(), "plots"))
 
-    quit()
-
     # save model
     #model.save(SAVE_DIR)
 
