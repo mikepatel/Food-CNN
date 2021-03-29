@@ -234,7 +234,8 @@ if __name__ == "__main__":
     # re-compile model
     model.compile(
         loss="categorical_crossentropy",
-        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE_FINE_TUNING),
+        #optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE_FINE_TUNING),
+        optimizer=tf.keras.optimizers.SGD(learning_rate=LEARNING_RATE_FINE_TUNING),
         metrics=["accuracy"]
     )
 
