@@ -35,5 +35,5 @@ LEARNING_RATE = 1e-2  # default 0.001 for Adam, 0.01 for SGD
 NUM_EPOCHS = 10
 
 # fine-tuning
-LEARNING_RATE_FINE_TUNING = 1e-3  # Adam - 1e-5, SGD
+LEARNING_RATE_FINE_TUNING = 1e-4  # Adam - 1e-5, SGD
 NUM_EPOCHS_FINE_TUNING = 10
