@@ -31,7 +31,7 @@ BATCH_SIZE = 32
 VALIDATION_SPLIT = 0.2
 DATASET_SEED = 123
 
-LEARNING_RATE = 1e-2  # default 0.001 for Adam, 0.01 for SGD
+LEARNING_RATE = 1e-3  # default 0.001 for Adam, 0.01 for SGD
 NUM_EPOCHS = 10
 
 # fine-tuning
