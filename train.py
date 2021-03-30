@@ -161,8 +161,8 @@ if __name__ == "__main__":
         #loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),  # label_mode = "int"
         #loss="categorical_crossentropy",
         loss="categorical_crossentropy",
-        #optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
-        optimizer=tf.keras.optimizers.SGD(learning_rate=LEARNING_RATE),
+        optimizer=tf.keras.optimizers.Adam(learning_rate=LEARNING_RATE),
+        #optimizer=tf.keras.optimizers.SGD(learning_rate=LEARNING_RATE),
         metrics=["accuracy"]
     )
 
