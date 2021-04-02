@@ -278,13 +278,11 @@ if __name__ == "__main__":
     plt.savefig(os.path.join(os.getcwd(), "plots_finetune"))
 
     # save model
-    #model.save(SAVE_DIR)
+    model.save(SAVE_DIR)
 
-    """
     # ----- DEPLOY ----- #
     converter = tf.lite.TFLiteConverter.from_saved_model(SAVE_DIR)
     tflite_model = converter.convert()
 
     with open(os.path.join(SAVE_DIR, 'model.tflite'), 'wb') as f:
         f.write(tflite_model)
-    """
