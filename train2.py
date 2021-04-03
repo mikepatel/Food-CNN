@@ -66,15 +66,7 @@ if __name__ == "__main__":
     )
     mobilenet.trainable = False
 
-    """
-    model = tf.keras.Sequential([
-        mobilenet,
-        tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu"),
-        tf.keras.layers.Dropout(0.2),
-        tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.Dense(units=num_classes, activation="softmax")
-    ])
-    """
+    # build model
     inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
     x = inputs
     x = mobilenet(x)
@@ -88,6 +80,7 @@ if __name__ == "__main__":
         outputs=outputs
     )
 
+    # compile model
     model.compile(
         loss="categorical_crossentropy",
         optimizer=tf.keras.optimizers.Adam(),
@@ -160,7 +153,8 @@ if __name__ == "__main__":
         validation_data=validation_generator,
         validation_steps=len(validation_generator)
     )
-    
+
+    # fine-tuning plots
     acc = history.history['accuracy']
     val_acc = history.history['val_accuracy']
 
