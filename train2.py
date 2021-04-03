@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     # image generators
     datagen = tf.keras.preprocessing.image.ImageDataGenerator(
-        rescale=1./255,
+        #rescale=1./255,
         validation_split=VALIDATION_SPLIT
     )
 
@@ -75,6 +75,7 @@ if __name__ == "__main__":
     """
     inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
     x = inputs
+    x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
     x = mobilenet(x)
     x = tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
     x = tf.keras.layers.Dropout(rate=0.2)(x)
