@@ -28,6 +28,7 @@ if __name__ == "__main__":
     # get labels / class names
     directories = os.listdir(TRAIN_DIR)
     num_classes = len(directories)
+    print(f'Number of classes: {num_classes}')
 
     # create text file with labels
     if not os.path.exists(os.path.join(os.getcwd(), "labels.txt")):
@@ -63,9 +64,17 @@ if __name__ == "__main__":
     )
     mobilenet.trainable = False
 
+    """
+    model = tf.keras.Sequential([
+        mobilenet,
+        tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu"),
+        tf.keras.layers.Dropout(0.2),
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.Dense(units=num_classes, activation="softmax")
+    ])
+    """
     inputs = tf.keras.Input(shape=(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_CHANNELS))
     x = inputs
-    x = tf.keras.applications.mobilenet_v2.preprocess_input(x)
     x = mobilenet(x)
     x = tf.keras.layers.Conv2D(filters=32, kernel_size=3, activation="relu")(x)
     x = tf.keras.layers.Dropout(rate=0.2)(x)
