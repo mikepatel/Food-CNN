@@ -11,7 +11,7 @@ File description:
 """
 ################################################################################
 # Imports
-from packages import  *
+from packages import *
 
 
 ################################################################################
@@ -41,6 +41,9 @@ if __name__ == "__main__":
         rescale=1./255,
         horizontal_flip=True,
         vertical_flip=True,
+        width_shift_range=0.3,
+        height_shift_range=0.3,
+        brightness_range=[0.3, 1.3],
         validation_split=VALIDATION_SPLIT
     )
 
